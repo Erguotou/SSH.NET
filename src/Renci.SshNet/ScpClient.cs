@@ -216,7 +216,14 @@ namespace Renci.SshNet
                 // as a file in case the directory does not exist
                 if (!channel.SendExecRequest(string.Format("scp -t {0}", _remotePathTransformation.Transform(path))))
                 {
-                    throw SecureExecutionRequestRejectedException();
+                    // split the path from the file
+                    var pathOnly = path.Substring(0, pathEnd);
+                    var fileOnly = path.Substring(pathEnd + 1);
+                    //  Send channel command request
+                    channel.SendExecRequest(string.Format("scp -t {0}", pathOnly));
+                    CheckReturnCode(input);
+
+                    path = fileOnly;
                 }
                 CheckReturnCode(input);
 
@@ -251,11 +258,8 @@ namespace Renci.SshNet
                 channel.Open();
 
                 //  Send channel command request
-                if (!channel.SendExecRequest(string.Format("scp -f {0}", _remotePathTransformation.Transform(filename))))
-                {
-                    throw SecureExecutionRequestRejectedException();
-                }
-                SendSuccessConfirmation(channel); //  Send reply
+                channel.SendExecRequest(string.Format("scp -f {0}", filename));
+                SendConfirmation(channel); //  Send reply
 
                 var message = ReadString(input);
                 var match = FileInfoRe.Match(message);
@@ -397,7 +401,7 @@ namespace Renci.SshNet
 
             if (b > 0)
             {
-                var errorText = ReadString(input);
+                var errorText = _byteToChar[b] + ReadString(input);
 
                 throw new ScpException(errorText);
             }
