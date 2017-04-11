@@ -184,7 +184,7 @@ namespace Renci.SshNet
                     var pathOnly = path.Substring(0, pathEnd);
                     var fileOnly = path.Substring(pathEnd + 1);
                     //  Send channel command request
-                    channel.SendExecRequest(string.Format("scp -t \"{0}\"", pathOnly));
+                    channel.SendExecRequest(string.Format("scp -t {0}", pathOnly));
                     CheckReturnCode(input);
 
                     path = fileOnly;
@@ -220,7 +220,7 @@ namespace Renci.SshNet
                 channel.Open();
 
                 //  Send channel command request
-                channel.SendExecRequest(string.Format("scp -f \"{0}\"", filename));
+                channel.SendExecRequest(string.Format("scp -f {0}", filename));
                 SendConfirmation(channel); //  Send reply
 
                 var message = ReadString(input);
@@ -345,7 +345,7 @@ namespace Renci.SshNet
 
             if (b > 0)
             {
-                var errorText = ReadString(input);
+                var errorText = _byteToChar[b] + ReadString(input);
 
                 throw new ScpException(errorText);
             }
